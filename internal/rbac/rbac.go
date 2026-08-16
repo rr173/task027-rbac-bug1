@@ -45,7 +45,7 @@ func ValidPerm(p string) bool { return permRe.MatchString(p) }
 // Store 持有全部角色定义与用户-角色授权关系。
 type Store struct {
 	mu    sync.RWMutex
-	roles map[string]*Role          // roleID -> role
+	roles map[string]*Role               // roleID -> role
 	users map[string]map[string]struct{} // user -> set of roleID
 }
 
@@ -239,6 +239,9 @@ func (s *Store) EffectivePermissions(user string) (allow, deny []string) {
 		for _, p := range r.Deny {
 			denySet[p] = true
 		}
+	}
+	for p := range denySet {
+		delete(allowSet, p)
 	}
 	allow = sortedKeys(allowSet)
 	deny = sortedKeys(denySet)
